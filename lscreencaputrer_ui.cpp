@@ -9,14 +9,21 @@
 #include <QImage>
 #include <QDebug>
 
+#include "drawpoints.h"
+
 LScreenCaputrerUI::LScreenCaputrerUI(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::LScreenCaputrerUI)
 {
+    m_drawPoints = m_drawPoints->getInstance();
     ui->setupUi(this);
     resize(600, 400);
 
-    screenInit();
+//    screenInit();
+    setAttribute( Qt::WA_Hover,true);
+    test1 = new LScreenClipper(this);
+    setMouseTracking(true);
+    test1->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 //    test = new BasePainter(this);
 }
 
@@ -27,99 +34,40 @@ LScreenCaputrerUI::~LScreenCaputrerUI()
 
 void LScreenCaputrerUI::mousePressEvent(QMouseEvent *e)
 {
-    m_path.append(e->pos());
+    m_drawPoints->appendPoint(e->pos());
 }
 
 void LScreenCaputrerUI::mouseMoveEvent(QMouseEvent *e)
 {
-    m_path.append(e->pos());
+    if(e->buttons() & Qt::LeftButton){
+        m_drawPoints->appendPoint(e->pos());
+    }
+    else{
+        if(test1->clipRect().contains(e->pos())){
+            setCursor(Qt::SizeAllCursor);
+        }
+        else{
+            unsetCursor();
+        }
+    }
+
     repaint();
 }
 
 void LScreenCaputrerUI::mouseReleaseEvent(QMouseEvent *e)
 {
-    m_path.append(e->pos());
+    m_drawPoints->appendPoint(e->pos());
+    m_drawPoints->appendHistory();
+    m_drawPoints->reset();
+//    m_drawPoints->appendHistory();
     repaint();
 }
 
 void LScreenCaputrerUI::paintEvent(QPaintEvent *e)
 {
-    QPainter painter(this);
-    painter.setBrush(QBrush(QColor(0, 0, 0, 50)));
-    painter.setClipping(true);
-
-    painter.drawImage(0,0,m_pmap.toImage());
-    painter.drawRect(rect());
-    if(m_path.count() >= 2){
-        const qint32 lastX = m_path.last().x();
-        const qint32 lastY =m_path.last().y();
-        const qint32 firstX = m_path.first().x();
-        const qint32 firstY = m_path.first().y();
-
-        const qint32 width = lastX - firstX;
-        const qint32 height = lastY - firstY;
-        const qint32 drawX = width > 0 ? firstX : lastX;
-        const qint32 limitX = width > 0 ? lastX : firstX;
-        const qint32 drawY = height > 0 ? firstY : lastY;
-        const qint32 limitY = height > 0 ? lastY : firstY;
+    Q_UNUSED(e)
 
 
-        QImage clipImg(QSize(qAbs(width), qAbs(height)), QImage::Format_ARGB32);
-
-//        qDebug()<< "====";
-//        qDebug()<< "width "<<width;
-//        qDebug()<< "height "<<height;
-//        qDebug()<< "limitHeight "<<limitHeight;
-//        qDebug()<< "limitWidth "<<limitWidth;
-//        qDebug()<< "----";
-
-        //row by column - left to Right
-        if(width > 0 && height > 0){
-            for(qint32 clipY = drawY, srcY = 0; clipY < limitY; clipY++, srcY++){
-                qint32 srcX = 0;
-                for(qint32 clipX = firstX; clipX < lastX; clipX++,srcX++){
-                    clipImg.setPixel(srcX, srcY, m_srcMap.pixel(clipX, clipY));
-                }
-            }
-
-        }
-
-        else if(width < 0 && height > 0){
-            for(qint32 clipY = firstY, srcY = 0; clipY < lastY; clipY++, srcY++){
-                qint32 srcX = 0;
-                for(qint32 clipX = lastX; clipX < firstX; clipX++, srcX++){
-                    clipImg.setPixel(srcX, srcY, m_srcMap.pixel(clipX, clipY));
-                }
-            }
-//            painter.drawImage(QRect(lastX,firstY, width, height), clipImg);
-        }
-
-
-
-        else if(width > 0 && height < 0){
-            for(qint32 clipY = lastY, srcY = 0; clipY < firstY; clipY++, srcY++){
-                qint32 srcX = 0;
-                for(qint32 clipX = firstX; clipX < lastX; clipX++, srcX++){
-                    clipImg.setPixel(srcX, srcY, m_srcMap.pixel(clipX, clipY));
-                }
-            }
-//                painter.drawImage(QRect(firstX,lastY, width, height), clipImg);
-        }
-
-        else if(width < 0 && height < 0){
-            for(qint32 clipY = lastY, srcY = 0; clipY < firstY; clipY++, srcY++){
-                qint32 srcX = 0;
-                for(qint32 clipX = lastX; clipX < firstX; clipX++, srcX++){
-                    clipImg.setPixel(srcX, srcY, m_srcMap.pixel(clipX, clipY));
-                }
-            }
-//            painter.drawImage(QRect(lastX,lastY, width, height), clipImg);
-        }
-
-        if(width && height){
-            painter.drawImage(QRect(drawX,drawY, width, height), clipImg);
-        }
-    }
 
 }
 

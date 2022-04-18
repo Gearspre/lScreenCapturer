@@ -4,10 +4,13 @@
 #include <QWidget>
 
 #include "basepainter.h"
+#include "lscreenclipper.h"
 
 class QPaintEvent;
 class QMouseEvent;
 class QScreen;
+class drawPointSingleton;
+class LScreenClipper;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class LScreenCaputrerUI; }
@@ -36,8 +39,10 @@ private:
     QVector<QPoint> m_path;
     Ui::LScreenCaputrerUI *ui;
     BasePainter* test;
+    LScreenClipper* test1;
     QScreen* m_currentScreen = nullptr;
     QPixmap m_pmap;
     QImage m_srcMap;
+    drawPointSingleton* m_drawPoints = nullptr;
 };
 #endif // LSCREENCAPUTRERUI_H

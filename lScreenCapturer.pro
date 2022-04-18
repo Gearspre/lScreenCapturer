@@ -17,12 +17,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     basepainter.cpp \
+    drawpoints.cpp \
+    lscreenclipper.cpp \
     main.cpp \
     lscreencaputrer_ui.cpp
 
 HEADERS += \
     basepainter.h \
-    lscreencaputrer_ui.h
+    drawpoints.h \
+    lscreencaputrer_ui.h \
+    lscreenclipper.h
 
 FORMS += \
     lscreencaputrer_ui.ui
