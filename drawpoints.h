@@ -10,6 +10,14 @@ class drawPointSingleton
 {
     friend class LScreenCaputrerUI;
 public:
+    enum drawAction{
+        CREATE,
+        MOVE,
+        LEFT_TOP_EXPAND,
+        LEFT_BOTTOM_EXPAND,
+        RIGHT_TOP_EXPAND,
+        RIGHT_BOTTOM_EXPAND
+    };
     enum drawShape{
         NONE,
         FREE,
@@ -18,6 +26,7 @@ public:
         ELLIPSE
     };
     struct drawParam{
+        drawAction action;
         drawShape shape;
         QVector<QPoint> path;
         Qt::GlobalColor color;
@@ -38,6 +47,7 @@ public:
 private:
     void drawInit();
     void appendPoint(const QPoint& point);
+    void setCurrentAction(drawPointSingleton::drawAction action);
     void appendHistory();
     void reset();
 

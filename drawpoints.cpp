@@ -36,6 +36,11 @@ void drawPointSingleton::appendPoint(const QPoint &point)
     m_currentDraw.path.append(point);
 }
 
+void drawPointSingleton::setCurrentAction(drawPointSingleton::drawAction action)
+{
+    m_currentDraw.action = action;
+}
+
 void drawPointSingleton::appendHistory()
 {
     m_drawList.append(m_currentDraw);

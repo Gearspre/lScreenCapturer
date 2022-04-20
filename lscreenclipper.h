@@ -8,6 +8,9 @@
 class QMouseEvent;
 class drawPointSingleton;
 
+#define drapRectWidth 4
+#define drapRectHeight 4
+
 class LScreenClipper : public QWidget
 {
     Q_OBJECT
@@ -24,23 +27,34 @@ public:
 
 public:
     QRect clipRect();
+    QPoint clipLeftTop();
+    QPoint clipLeftBottom();
+    QPoint clipRightTop();
+    QPoint clipRightBottom();
+    QImage clipImage(bool& isVaild);
 
 private:
     void screenInit();
     void clipAreaInit();
+    void drawAroundRect(QPainter& painter);
     bool calculateClipArea(const QPoint& first,
                            const QPoint& last,
                            clipArea& area);
+    void moveClipArea(const QPoint& first,
+                      const QPoint& last,
+                      clipArea& area);
 
 protected:
     void paintEvent(QPaintEvent *event);
-//    void mouseMoveEvent(QMouseEvent* event);
 
 private:
     drawPointSingleton* m_drawPoints = nullptr;
     clipArea m_clipArea;
     QImage m_screenShot;
-    QPixmap m_screenShotBackground;
+
+private:
+    const qint32 dpRectWidth = drapRectWidth;
+    const qint32 dpRectHeight = drapRectHeight;
 };
 
 #endif // LSCREENCLIPPER_H

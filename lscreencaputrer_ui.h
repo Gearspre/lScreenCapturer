@@ -28,21 +28,11 @@ protected:
     void mousePressEvent(QMouseEvent* e);
     void mouseMoveEvent(QMouseEvent* e);
     void mouseReleaseEvent(QMouseEvent* e);
-    void paintEvent(QPaintEvent* e);
 
 private:
-    void screenInit();
-//    void reset();
-//    void drawShape(QPainter& painter, const drawParam& dParam);
-
-private:
-    QVector<QPoint> m_path;
     Ui::LScreenCaputrerUI *ui;
     BasePainter* test;
     LScreenClipper* test1;
-    QScreen* m_currentScreen = nullptr;
-    QPixmap m_pmap;
-    QImage m_srcMap;
     drawPointSingleton* m_drawPoints = nullptr;
 };
 #endif // LSCREENCAPUTRERUI_H

@@ -8,6 +8,7 @@
 #include <QWindow>
 #include <QImage>
 #include <QDebug>
+#include <QPushButton>
 
 #include "drawpoints.h"
 
@@ -15,15 +16,21 @@ LScreenCaputrerUI::LScreenCaputrerUI(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::LScreenCaputrerUI)
 {
-    m_drawPoints = m_drawPoints->getInstance();
     ui->setupUi(this);
     resize(600, 400);
-
-//    screenInit();
-    setAttribute( Qt::WA_Hover,true);
-    test1 = new LScreenClipper(this);
     setMouseTracking(true);
+    m_drawPoints = m_drawPoints->getInstance();
+
+    //just test
+    test1 = new LScreenClipper(this);
     test1->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    QPushButton* testSave = new QPushButton("save",this);
+    connect(testSave, &QPushButton::clicked, [this](){
+        bool isVaild = false;
+        QImage img = test1->clipImage(isVaild);
+        if(isVaild)
+        img.save("D://test.png", "PNG");
+    });
 //    test = new BasePainter(this);
 }
 
@@ -34,7 +41,15 @@ LScreenCaputrerUI::~LScreenCaputrerUI()
 
 void LScreenCaputrerUI::mousePressEvent(QMouseEvent *e)
 {
-    m_drawPoints->appendPoint(e->pos());
+    if(e->buttons() & Qt::LeftButton){
+        m_drawPoints->appendPoint(e->pos());
+        if(test1->clipRect().contains(e->pos())){
+            m_drawPoints->setCurrentAction(drawPointSingleton::MOVE);
+        }
+        else{
+            m_drawPoints->setCurrentAction(drawPointSingleton::CREATE);
+        }
+    }
 }
 
 void LScreenCaputrerUI::mouseMoveEvent(QMouseEvent *e)
@@ -59,28 +74,9 @@ void LScreenCaputrerUI::mouseReleaseEvent(QMouseEvent *e)
     m_drawPoints->appendPoint(e->pos());
     m_drawPoints->appendHistory();
     m_drawPoints->reset();
-//    m_drawPoints->appendHistory();
     repaint();
 }
 
-void LScreenCaputrerUI::paintEvent(QPaintEvent *e)
-{
-    Q_UNUSED(e)
-
-
-
-}
-
-void LScreenCaputrerUI::screenInit()
-{
-    m_currentScreen = QGuiApplication::primaryScreen();
-    if (const QWindow *window = windowHandle())
-        m_currentScreen = window->screen();
-    m_pmap = m_currentScreen->grabWindow(0);
-    m_srcMap = m_pmap.copy().toImage();
-//    if (!m_currentScreen)
-//        return;
-}
 
 
 
