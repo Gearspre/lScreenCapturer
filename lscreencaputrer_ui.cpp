@@ -58,12 +58,33 @@ void LScreenCaputrerUI::mouseMoveEvent(QMouseEvent *e)
         m_drawPoints->appendPoint(e->pos());
     }
     else{
-        if(test1->clipRect().contains(e->pos())){
+        drawPointSingleton::drawAction act = test1->drawAction(e->pos());
+
+        if( drawPointSingleton::CREATE == act){
+            setCursor(Qt::CrossCursor);
+        }
+        else if( drawPointSingleton::MOVE == act){
             setCursor(Qt::SizeAllCursor);
+        }
+        else if( drawPointSingleton::TOP_LEFT_EXPAND == act){
+            setCursor(Qt::SizeFDiagCursor);
+        }
+        else if( drawPointSingleton::TOP_RIGHT_EXPAND == act){
+            setCursor(Qt::SizeBDiagCursor);
+        }
+        else if( drawPointSingleton::BOTTOM_LEFT_EXPAND == act){
+            setCursor(Qt::SizeBDiagCursor);
+        }
+        else if( drawPointSingleton::BOTTOM_RIGHT_EXPAND == act){
+            setCursor(Qt::SizeFDiagCursor);
         }
         else{
             unsetCursor();
         }
+//        if(test1->clipRect().contains(e->pos())){
+
+//        }
+
     }
 
     repaint();

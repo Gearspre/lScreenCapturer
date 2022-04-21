@@ -1,7 +1,7 @@
 #ifndef DRAWPOINTSINGLETON_H
 #define DRAWPOINTSINGLETON_H
 
-#include "lscreencaputrer_ui.h"
+//#include "lscreencaputrer_ui.h"
 
 #include <QVector>
 #include <QPoint>
@@ -13,10 +13,16 @@ public:
     enum drawAction{
         CREATE,
         MOVE,
-        LEFT_TOP_EXPAND,
-        LEFT_BOTTOM_EXPAND,
-        RIGHT_TOP_EXPAND,
-        RIGHT_BOTTOM_EXPAND
+
+        TOP_EXPAND,
+        BOTTOM_EXPAND,
+        LEFT_EXPAND,
+        RIGHT_EXPAND,
+
+        TOP_LEFT_EXPAND,
+        BOTTOM_LEFT_EXPAND,
+        TOP_RIGHT_EXPAND,
+        BOTTOM_RIGHT_EXPAND
     };
     enum drawShape{
         NONE,
