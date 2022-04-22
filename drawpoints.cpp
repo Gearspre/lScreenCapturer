@@ -24,6 +24,7 @@ QList<drawPointSingleton::drawParam> &drawPointSingleton::history()
 {
     return m_drawList;
 }
+
 void drawPointSingleton::drawInit()
 {
     m_currentDraw.color = Qt::black;

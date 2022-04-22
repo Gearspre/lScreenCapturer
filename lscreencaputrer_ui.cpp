@@ -42,13 +42,15 @@ LScreenCaputrerUI::~LScreenCaputrerUI()
 void LScreenCaputrerUI::mousePressEvent(QMouseEvent *e)
 {
     if(e->buttons() & Qt::LeftButton){
+        drawPointSingleton::drawAction act = test1->drawAction(e->pos());
         m_drawPoints->appendPoint(e->pos());
-        if(test1->clipRect().contains(e->pos())){
-            m_drawPoints->setCurrentAction(drawPointSingleton::MOVE);
-        }
-        else{
-            m_drawPoints->setCurrentAction(drawPointSingleton::CREATE);
-        }
+        m_drawPoints->setCurrentAction(act);
+//        if(test1->clipRect().contains(e->pos())){
+//            m_drawPoints->setCurrentAction(drawPointSingleton::MOVE);
+//        }
+//        else{
+//            m_drawPoints->setCurrentAction(drawPointSingleton::CREATE);
+//        }
     }
 }
 

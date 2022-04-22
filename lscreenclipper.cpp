@@ -13,33 +13,33 @@ LScreenClipper::LScreenClipper(QWidget *parent) : QWidget(parent)
 {
     this->resize(parent->size());
     screenInit();
-    posHashInit();
     clipAreaInit();
+    actHashInit();
     setMouseTracking(true);
     m_drawPoints = drawPointSingleton::getInstance();
 }
 
 drawPointSingleton::drawAction LScreenClipper::drawAction(const QPoint &point)
 {
-    areaPos apos = OUTSIDE;
+    drawPointSingleton::drawAction act = drawPointSingleton::CREATE;
     if(clipRect().contains(point)){
-        apos = INSIDE;
+        act = drawPointSingleton::MOVE;
     }
     else if(clipTopLeftRect().contains(point)){
-        apos = TOP_LEFT;
+        act = drawPointSingleton::TOP_LEFT_EXPAND;
     }
     else if(clipTopRightRect().contains(point)){
-        apos = TOP_RIGHT;
+        act = drawPointSingleton::TOP_RIGHT_EXPAND;
     }
     else if(clipBottomLeftRect().contains(point)){
-        apos = BOTTOM_LEFT;
+        act = drawPointSingleton::BOTTOM_LEFT_EXPAND;
     }
     else if(clipBottomRightRect().contains(point)){
-        apos = BOTTOM_RIGHT;
+        act = drawPointSingleton::BOTTOM_RIGHT_EXPAND;
     }
 
 
-    return m_posHash.value(apos);
+    return act;
 }
 
 QRect LScreenClipper::clipRect()
@@ -87,6 +87,30 @@ QRect LScreenClipper::clipBottomRightRect()
     return QRect(clipBottomRight() - dpRectOffsetPoint,dpRectSize);
 }
 
+QPoint LScreenClipper::clipAdaptTopLeft()
+{
+    const qint32 topLeftX = m_clipArea.width > 0 ? m_clipArea.x : m_clipArea.x - m_clipArea.width;
+    const qint32 topLeftY = m_clipArea.height > 0 ? m_clipArea.y : m_clipArea.y - m_clipArea.height;
+
+    return QPoint(topLeftX, topLeftY);
+}
+
+QPoint LScreenClipper::clipAdaptBottomRight()
+{
+    const qint32 bottomLeftX = m_clipArea.width > 0 ? m_clipArea.x + m_clipArea.width : m_clipArea.x;
+    const qint32 bottomLeftY = m_clipArea.height > 0 ? m_clipArea.y + m_clipArea.height : m_clipArea.y;
+
+    return QPoint(bottomLeftX, bottomLeftY);
+}
+
+void LScreenClipper::updateClipAreaPos()
+{
+    m_clipPos.topLeft = clipTopLeft();
+    m_clipPos.topRight = clipTopRight();
+    m_clipPos.bottomLeft = clipBottomLeft();
+    m_clipPos.bottomRight = clipBottomRight();
+}
+
 QImage LScreenClipper::clipImage(bool &isVaild)
 {
     if(m_clipArea.img.isNull()){
@@ -118,21 +142,12 @@ void LScreenClipper::clipAreaInit()
     m_clipArea.img = QImage();
 }
 
-void LScreenClipper::posHashInit()
+void LScreenClipper::actHashInit()
 {
-    m_posHash.insert(OUTSIDE, drawPointSingleton::CREATE);
-    m_posHash.insert(INSIDE, drawPointSingleton::MOVE);
-
-    m_posHash.insert(BOTTOM_LEFT,  drawPointSingleton::BOTTOM_LEFT_EXPAND);
-    m_posHash.insert(BOTTOM_RIGHT, drawPointSingleton::BOTTOM_RIGHT_EXPAND);
-    m_posHash.insert(BOTTOM_MIDDLE, drawPointSingleton::BOTTOM_EXPAND);
-
-    m_posHash.insert(TOP_LEFT,  drawPointSingleton::TOP_LEFT_EXPAND);
-    m_posHash.insert(TOP_RIGHT, drawPointSingleton::TOP_RIGHT_EXPAND);
-    m_posHash.insert(TOP_MIDDLE, drawPointSingleton::TOP_EXPAND);
-
-    m_posHash.insert(LEFT_MIDDLE, drawPointSingleton::LEFT_EXPAND);
-    m_posHash.insert(RIGHT_MIDDLE, drawPointSingleton::RIGHT_EXPAND);
+    m_actHash.insert(drawPointSingleton::TOP_RIGHT_EXPAND, &m_clipPos.bottomLeft);
+    m_actHash.insert(drawPointSingleton::TOP_LEFT_EXPAND, &m_clipPos.bottomRight);
+    m_actHash.insert(drawPointSingleton::BOTTOM_LEFT_EXPAND, &m_clipPos.topRight);
+    m_actHash.insert(drawPointSingleton::BOTTOM_RIGHT_EXPAND, &m_clipPos.topLeft);
 }
 
 void LScreenClipper::drawAroundRect(QPainter &painter)
@@ -238,6 +253,21 @@ void LScreenClipper::paintEvent(QPaintEvent *event)
                               m_clipArea);
         }
 
+        else{
+            QPoint* startPoint = m_actHash.value(m_drawPoints->current().action);
+            switch (m_drawPoints->current().action) {
+            case drawPointSingleton::BOTTOM_RIGHT_EXPAND:
+            case drawPointSingleton::BOTTOM_LEFT_EXPAND:
+            case drawPointSingleton::TOP_LEFT_EXPAND:
+            case drawPointSingleton::TOP_RIGHT_EXPAND:
+                calculateClipArea(*startPoint,
+                                  m_drawPoints->current().path.last(),
+                                  m_clipArea);
+            default:
+                break;
+            }
+        }
+
         if(m_clipArea.width && m_clipArea.height){
             painter.drawImage(QRect(m_clipArea.x, m_clipArea.y, m_clipArea.width, m_clipArea.height), m_clipArea.img);
             drawAroundRect(painter);
@@ -253,38 +283,15 @@ void LScreenClipper::paintEvent(QPaintEvent *event)
         }
 
         else if(m_drawPoints->history().last().action == drawPointSingleton::MOVE){
-            qint32 startX = 0;
-            qint32 startY = 0;
-            qint32 endX = 0;
-            qint32 endY = 0;
-
-            // reset start and end
-            if(m_clipArea.width > 0){
-                startX = m_clipArea.x;
-                endX = m_clipArea.x + m_clipArea.width;
-            }
-            else{
-                startX = m_clipArea.x - m_clipArea.width;
-                endX = m_clipArea.x;
-            }
-
-            if(m_clipArea.height > 0){
-                startY = m_clipArea.y;
-                endY = m_clipArea.y + m_clipArea.height;
-            }
-            else{
-                startY = m_clipArea.y - m_clipArea.height;
-                endY = m_clipArea.y;
-            }
-
-            calculateClipArea(QPoint(startX, startY),
-                              QPoint(endX, endY),
+            calculateClipArea(clipAdaptTopLeft(),
+                              clipAdaptBottomRight(),
                               m_clipArea);
         }
 
         if(m_clipArea.width && m_clipArea.height){
             painter.drawImage(QRect(m_clipArea.x, m_clipArea.y, m_clipArea.width, m_clipArea.height), m_clipArea.img);
             drawAroundRect(painter);
+            updateClipAreaPos();
         }
     }
 }

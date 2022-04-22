@@ -13,24 +13,15 @@
 class LScreenClipper : public QWidget
 {
     Q_OBJECT
-    enum areaPos{
-        OUTSIDE,
-        INSIDE,
 
-        BOTTOM_LEFT,
-        BOTTOM_RIGHT,
-        BOTTOM_MIDDLE,
-
-        TOP_LEFT,
-        TOP_RIGHT,
-        TOP_MIDDLE,
-
-        LEFT_MIDDLE,
-        RIGHT_MIDDLE
+    struct clipAreaPos{
+        QPoint topLeft;
+        QPoint topRight;
+        QPoint bottomLeft;
+        QPoint bottomRight;
     };
 
     struct clipArea{
-
         qint32 x = 0;   /** left top x */
         qint32 y = 0;   /** left top y */
         qint32 rbx = 0; /** right bottom x */
@@ -58,7 +49,10 @@ public:
     QRect clipTopRightRect();
     QRect clipBottomRightRect();
 
+    QPoint clipAdaptTopLeft(); /** always return top left point whenever width > 0 */
+    QPoint clipAdaptBottomRight();
 private:
+    void updateClipAreaPos();
     void drawAroundRect(QPainter& painter);
     bool calculateClipArea(const QPoint& first,
                            const QPoint& last,
@@ -70,7 +64,7 @@ private:
 private:
     void screenInit();
     void clipAreaInit();
-    void posHashInit();
+    void actHashInit();
     void dpRectInit();
 
 protected:
@@ -79,8 +73,9 @@ protected:
 private:
     drawPointSingleton* m_drawPoints = nullptr;
     clipArea m_clipArea;
+    clipAreaPos m_clipPos;/** never change before drop down mouse */
     QImage m_screenShot;
-    QHash<areaPos, drawPointSingleton::drawAction> m_posHash;
+    QHash<drawPointSingleton::drawAction, QPoint*> m_actHash;
 
 private:
     const qint32 dpRectWidth = drapRectWidth;
