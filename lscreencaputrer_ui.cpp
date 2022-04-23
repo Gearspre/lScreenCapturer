@@ -8,7 +8,7 @@
 #include <QWindow>
 #include <QImage>
 #include <QDebug>
-#include <QPushButton>
+#include <QStyle>
 
 #include "drawpoints.h"
 
@@ -21,22 +21,28 @@ LScreenCaputrerUI::LScreenCaputrerUI(QWidget *parent)
     setMouseTracking(true);
     m_drawPoints = m_drawPoints->getInstance();
 
+    toolbar = new LScreenPainterToolBar();
+    toolbar->show();
+
     //just test
-    test1 = new LScreenClipper(this);
-    test1->setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    QPushButton* testSave = new QPushButton("save",this);
-    connect(testSave, &QPushButton::clicked, [this](){
-        bool isVaild = false;
-        QImage img = test1->clipImage(isVaild);
-        if(isVaild)
-        img.save("D://test.png", "PNG");
-    });
+//    test1 = new LScreenClipper(this);
+//    test1->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+
+//    QPushButton* testSave = new QPushButton("save",this);
+//    connect(testSave, &QPushButton::clicked, [this](){
+//        bool isVaild = false;
+//        QImage img = test1->clipImage(isVaild);
+//        if(isVaild)
+//        img.save("D://test.png", "PNG");
+//    });
+
 //    test = new BasePainter(this);
 }
 
 LScreenCaputrerUI::~LScreenCaputrerUI()
 {
     delete ui;
+    delete toolbar;
 }
 
 void LScreenCaputrerUI::mousePressEvent(QMouseEvent *e)
@@ -45,12 +51,6 @@ void LScreenCaputrerUI::mousePressEvent(QMouseEvent *e)
         drawPointSingleton::drawAction act = test1->drawAction(e->pos());
         m_drawPoints->appendPoint(e->pos());
         m_drawPoints->setCurrentAction(act);
-//        if(test1->clipRect().contains(e->pos())){
-//            m_drawPoints->setCurrentAction(drawPointSingleton::MOVE);
-//        }
-//        else{
-//            m_drawPoints->setCurrentAction(drawPointSingleton::CREATE);
-//        }
     }
 }
 

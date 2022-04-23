@@ -1,5 +1,5 @@
-#ifndef BASEPAINTER_H
-#define BASEPAINTER_H
+#ifndef LSCREENPAINTER_H
+#define LSCREENPAINTER_H
 
 #include <QObject>
 #include <QWidget>
@@ -7,7 +7,7 @@
 class QMouseEvent;
 class QPaintEvent;
 
-class BasePainter : public QWidget
+class LScreenPainter : public QWidget
 {
     Q_OBJECT
 private:
@@ -25,7 +25,7 @@ private:
     };
 
 public:
-    explicit BasePainter(QWidget *parent = nullptr);
+    explicit LScreenPainter(QWidget *parent = nullptr);
 
 public:
 
@@ -49,4 +49,4 @@ signals:
 
 };
 
-#endif // BASEPAINTER_H
+#endif // LSCREENPAINTER_H

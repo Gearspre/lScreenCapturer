@@ -3,8 +3,9 @@
 
 #include <QWidget>
 
-#include "basepainter.h"
+#include "lscreenpainter.h"
 #include "lscreenclipper.h"
+#include "lscreenpaintertoolbar.h"
 
 class QPaintEvent;
 class QMouseEvent;
@@ -31,8 +32,9 @@ protected:
 
 private:
     Ui::LScreenCaputrerUI *ui;
-    BasePainter* test;
+    LScreenPainter* test;
     LScreenClipper* test1;
+    LScreenPainterToolBar* toolbar = nullptr;
     drawPointSingleton* m_drawPoints = nullptr;
 };
 #endif // LSCREENCAPUTRERUI_H

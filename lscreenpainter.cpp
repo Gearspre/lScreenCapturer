@@ -1,4 +1,4 @@
-#include "basepainter.h"
+#include "lscreenpainter.h"
 
 #include <QDebug>
 #include <QVector>
@@ -6,33 +6,33 @@
 #include <QMouseEvent>
 #include <QPaintEvent>
 
-BasePainter::BasePainter(QWidget *parent) : QWidget(parent)
+LScreenPainter::LScreenPainter(QWidget *parent) : QWidget(parent)
 {
     drawInit();
     this->resize(parent->size());
 }
 
-void BasePainter::drawInit()
+void LScreenPainter::drawInit()
 {
     m_currentDraw.color = Qt::black;
     m_currentDraw.path.clear();
     m_currentDraw.shape = ELLIPSE;
 }
 
-void BasePainter::mousePressEvent(QMouseEvent *e)
+void LScreenPainter::mousePressEvent(QMouseEvent *e)
 {
     m_currentDraw.path.append(e->pos());
     qDebug()<< e->pos();
 }
 
-void BasePainter::mouseMoveEvent(QMouseEvent *e)
+void LScreenPainter::mouseMoveEvent(QMouseEvent *e)
 {
     m_currentDraw.path.append(e->pos());
 
     repaint();
 }
 
-void BasePainter::mouseReleaseEvent(QMouseEvent *e)
+void LScreenPainter::mouseReleaseEvent(QMouseEvent *e)
 {
     m_currentDraw.path.append(e->pos());
     m_drawList.append(m_currentDraw);
@@ -40,7 +40,7 @@ void BasePainter::mouseReleaseEvent(QMouseEvent *e)
     repaint();
 }
 
-void BasePainter::paintEvent(QPaintEvent *e)
+void LScreenPainter::paintEvent(QPaintEvent *e)
 {
     Q_UNUSED(e)
     QPainter painter(this);
@@ -53,14 +53,14 @@ void BasePainter::paintEvent(QPaintEvent *e)
     }
 }
 
-void BasePainter::reset()
+void LScreenPainter::reset()
 {
     m_currentDraw.color = Qt::black;
     m_currentDraw.path.clear();
 //    m_currentDraw.shape = NONE;
 }
 
-void BasePainter::drawShape(QPainter &painter, const drawParam &dParam)
+void LScreenPainter::drawShape(QPainter &painter, const drawParam &dParam)
 {
     if(NONE == dParam.shape) return;
 
