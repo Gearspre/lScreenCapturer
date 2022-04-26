@@ -32,9 +32,9 @@ protected:
 
 private:
     Ui::LScreenCaputrerUI *ui;
-    LScreenPainter* test;
-    LScreenClipper* test1;
-    LScreenPainterToolBar* toolbar = nullptr;
+    LScreenPainter* m_painter = nullptr;
+    LScreenClipper* m_clipper = nullptr;
+    LScreenPainterToolBar* m_ptoolbar = nullptr;
     drawPointSingleton* m_drawPoints = nullptr;
 };
 #endif // LSCREENCAPUTRERUI_H

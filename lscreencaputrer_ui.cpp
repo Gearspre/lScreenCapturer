@@ -15,14 +15,16 @@
 LScreenCaputrerUI::LScreenCaputrerUI(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::LScreenCaputrerUI)
+    , m_clipper(new LScreenClipper(this))
+    , m_painter(new LScreenPainter(this))
+    , m_ptoolbar(new LScreenPainterToolBar)
 {
     ui->setupUi(this);
     resize(600, 400);
     setMouseTracking(true);
     m_drawPoints = m_drawPoints->getInstance();
 
-    toolbar = new LScreenPainterToolBar();
-    toolbar->show();
+    m_ptoolbar->show();
 
     //just test
 //    test1 = new LScreenClipper(this);
@@ -36,19 +38,18 @@ LScreenCaputrerUI::LScreenCaputrerUI(QWidget *parent)
 //        img.save("D://test.png", "PNG");
 //    });
 
-//    test = new BasePainter(this);
 }
 
 LScreenCaputrerUI::~LScreenCaputrerUI()
 {
     delete ui;
-    delete toolbar;
+    delete m_ptoolbar;
 }
 
 void LScreenCaputrerUI::mousePressEvent(QMouseEvent *e)
 {
     if(e->buttons() & Qt::LeftButton){
-        drawPointSingleton::drawAction act = test1->drawAction(e->pos());
+        drawPointSingleton::drawAction act = m_clipper->drawAction(e->pos());
         m_drawPoints->appendPoint(e->pos());
         m_drawPoints->setCurrentAction(act);
     }
@@ -60,7 +61,7 @@ void LScreenCaputrerUI::mouseMoveEvent(QMouseEvent *e)
         m_drawPoints->appendPoint(e->pos());
     }
     else{
-        drawPointSingleton::drawAction act = test1->drawAction(e->pos());
+        drawPointSingleton::drawAction act = m_clipper->drawAction(e->pos());
 
         if( drawPointSingleton::CREATE == act){
             setCursor(Qt::CrossCursor);

@@ -3,6 +3,9 @@
 
 #include <QObject>
 #include <QWidget>
+#include <QMetaType>
+
+#include "lscreenpaintertoolbar.h"
 
 class QMouseEvent;
 class QPaintEvent;
@@ -10,25 +13,29 @@ class QPaintEvent;
 class LScreenPainter : public QWidget
 {
     Q_OBJECT
-private:
-    enum drawShape{
-        NONE,
-        FREE,
-        LINE,
-        RECTANGLE,
-        ELLIPSE
+
+public:
+
+    struct drawSetting{
+        LScreenPainterToolBar::drawShape shape;
+        qint32 lineWidth;
+        QColor color;
     };
+
     struct drawParam{
-        drawShape shape;
         QVector<QPoint> path;
-        Qt::GlobalColor color;
+        drawSetting setting;
     };
 
 public:
     explicit LScreenPainter(QWidget *parent = nullptr);
 
 public:
+    void startPaint(const QPoint& topLeft, const QSize& imgSize);
+    void stopPaint();
 
+public slots:
+    void onDrawSettingChanged(const drawSetting& setting);
 
 protected:
     void mousePressEvent(QMouseEvent* e);
@@ -39,7 +46,7 @@ protected:
 private:
     void drawInit();
     void reset();
-    void drawShape(QPainter &painter, const drawParam &dParam);
+    void drawShapes(QPainter &painter, const drawParam &dParam);
 
 private:
     drawParam m_currentDraw;
@@ -49,4 +56,5 @@ signals:
 
 };
 
+Q_DECLARE_METATYPE(LScreenPainter::drawSetting)
 #endif // LSCREENPAINTER_H
