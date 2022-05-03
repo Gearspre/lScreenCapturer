@@ -38,13 +38,17 @@ drawPointSingleton::drawAction LScreenClipper::drawAction(const QPoint &point)
         act = drawPointSingleton::BOTTOM_RIGHT_EXPAND;
     }
 
-
     return act;
 }
 
 QRect LScreenClipper::clipRect()
 {
     return QRect( QPoint(m_clipArea.x, m_clipArea.y) , QPoint(m_clipArea.rbx, m_clipArea.rby));
+}
+
+QSize LScreenClipper::clipSize()
+{
+    return QSize(m_clipArea.width, m_clipArea.height);
 }
 
 QPoint LScreenClipper::clipTopLeft()
@@ -128,6 +132,7 @@ void LScreenClipper::screenInit()
     QScreen* screen = QGuiApplication::primaryScreen();
     if (const QWindow *window = windowHandle())
         screen = window->screen();
+    this->resize(screen->size());
     m_screenShot = screen->grabWindow(0).toImage();
 //    if (!m_currentScreen)
     //        return;

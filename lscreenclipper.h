@@ -37,6 +37,7 @@ public:
 public:
     drawPointSingleton::drawAction drawAction(const QPoint& point);
     QRect clipRect();
+    QSize clipSize();
     QImage clipImage(bool& isVaild);
 
     QPoint clipTopLeft();
@@ -51,6 +52,7 @@ public:
 
     QPoint clipAdaptTopLeft(); /** always return top left point whenever width > 0 */
     QPoint clipAdaptBottomRight();
+
 private:
     void updateClipAreaPos();
     void drawAroundRect(QPainter& painter);

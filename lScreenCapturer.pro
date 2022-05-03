@@ -25,6 +25,7 @@ SOURCES += \
 
 HEADERS += \
     drawpoints.h \
+    drawsetting.h \
     lscreencaputrer_ui.h \
     lscreenclipper.h \
     lscreenpainter.h \

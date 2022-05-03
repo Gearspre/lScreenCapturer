@@ -1,10 +1,10 @@
 #ifndef DRAWPOINTSINGLETON_H
 #define DRAWPOINTSINGLETON_H
 
-//#include "lscreencaputrer_ui.h"
-
 #include <QVector>
 #include <QPoint>
+
+#include "drawSetting.h"
 
 class drawPointSingleton
 {
@@ -22,20 +22,15 @@ public:
         TOP_LEFT_EXPAND,
         BOTTOM_LEFT_EXPAND,
         TOP_RIGHT_EXPAND,
-        BOTTOM_RIGHT_EXPAND
+        BOTTOM_RIGHT_EXPAND,
+
+        PAINTING
     };
-    enum drawShape{
-        NONE,
-        FREE,
-        LINE,
-        RECTANGLE,
-        ELLIPSE
-    };
+
     struct drawParam{
         drawAction action;
-        drawShape shape;
+        drawSetting setting;
         QVector<QPoint> path;
-        Qt::GlobalColor color;
     };
 
 private:
@@ -53,15 +48,16 @@ public:
 private:
     void drawInit();
     void appendPoint(const QPoint& point);
+    void appendfPaintPoint(const QPoint& point);
     void setCurrentAction(drawPointSingleton::drawAction action);
+    void setCurrentSetting(const drawSetting& setting);
     void appendHistory();
-    void reset();
+    void resetAll();
+    void resetPath();
 
 private:
     drawParam m_currentDraw;
     QList<drawParam> m_drawList;
-
-
 };
 
 #endif // DRAWPOINTSINGLETON_H

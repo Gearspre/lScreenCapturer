@@ -30,6 +30,17 @@ protected:
     void mouseMoveEvent(QMouseEvent* e);
     void mouseReleaseEvent(QMouseEvent* e);
 
+private slots:
+    void onDrawSettingChanged(drawSetting setting);
+
+private:
+    void clipStart();
+    void clipFinish();
+    void clipMove();
+
+private:
+    void screenInit();
+
 private:
     Ui::LScreenCaputrerUI *ui;
     LScreenPainter* m_painter = nullptr;
@@ -37,4 +48,5 @@ private:
     LScreenPainterToolBar* m_ptoolbar = nullptr;
     drawPointSingleton* m_drawPoints = nullptr;
 };
+Q_DECLARE_METATYPE(drawSetting)
 #endif // LSCREENCAPUTRERUI_H

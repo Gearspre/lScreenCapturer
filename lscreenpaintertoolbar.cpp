@@ -12,29 +12,32 @@ LScreenPainterToolBar::LScreenPainterToolBar(QWidget *parent) : QToolBar(parent)
 {
     toolBarInit();
     iconButtonInit();
+    this->show();
+    this->hide();
 }
 
-LScreenPainterToolBar::drawShape LScreenPainterToolBar::currentShape()
+drawSetting LScreenPainterToolBar::currentSetting()
 {
-    drawShape shape = NONE;
-    for(auto& obj : m_btnVector){
-        QPushButton* btn = qobject_cast<QPushButton*>(obj.first);
-        if(btn->isChecked()){
-            shape = obj.second;
-            break;
-        }
-    }
+//    drawSetting::drawShape shape = drawSetting::NONE;
+//    for(auto& obj : m_btnVector){
+//        QPushButton* btn = qobject_cast<QPushButton*>(obj.first);
+//        if(btn->isChecked()){
+//            shape = obj.second;
+//            break;
+//        }
+//    }
 
-    return shape;
+
+    return m_setting;
 }
 
 void LScreenPainterToolBar::iconButtonInit()
 {
-    bool ret = addIconButton(":/icon/icon/write.svg", &LScreenPainterToolBar::onWriteCheckChanged, FREE);
-    ret = ret && addIconButton(":/icon/icon/square.svg", &LScreenPainterToolBar::onSqureCheckChanged, RECTANGLE);
-    ret = ret && addIconButton(":/icon/icon/round.svg", &LScreenPainterToolBar::onRoundCheckChanged, ELLIPSE);
-    ret = ret && addIconButton(":/icon/icon/return.svg", &LScreenPainterToolBar::onReturnCheckChanged, NONE, false);
-    ret = ret && addIconButton(":/icon/icon/save.svg", &LScreenPainterToolBar::onSaveCheckChanged, NONE, false);
+    bool ret = addIconButton(":/icon/icon/write.svg", &LScreenPainterToolBar::onWriteCheckChanged, drawSetting::FREE);
+    ret = ret && addIconButton(":/icon/icon/square.svg", &LScreenPainterToolBar::onSqureCheckChanged, drawSetting::RECTANGLE);
+    ret = ret && addIconButton(":/icon/icon/round.svg", &LScreenPainterToolBar::onRoundCheckChanged, drawSetting::ELLIPSE);
+    ret = ret && addIconButton(":/icon/icon/return.svg", &LScreenPainterToolBar::onReturnCheckChanged, drawSetting::NONE, false);
+    ret = ret && addIconButton(":/icon/icon/save.svg", &LScreenPainterToolBar::onSaveCheckChanged, drawSetting::NONE, false);
 }
 
 void LScreenPainterToolBar::toolBarInit()
@@ -46,13 +49,13 @@ void LScreenPainterToolBar::toolBarInit()
 
 void LScreenPainterToolBar::setButtonStyle(QPushButton *button,
                                            const QString &imgsrc,
-                                           drawShape shape,
+                                           drawSetting::drawShape shape,
                                            bool isCheck)
 {
     const int img_w= ICON_WIDTH;
     const int img_h= ICON_HEIGHT;
 
-    if(isCheck) m_btnVector.push_back(QPair<QObject*, drawShape>(button, shape));
+    if(isCheck) m_btnVector.push_back(QPair<QObject*, drawSetting::drawShape>(button, shape));
     button->setCheckable(isCheck);
     button->setFixedSize(img_w,img_h);
     button->setStyleSheet(m_iconButtonStyle.arg(imgsrc));
@@ -61,7 +64,7 @@ void LScreenPainterToolBar::setButtonStyle(QPushButton *button,
 
 bool LScreenPainterToolBar::addIconButton(const QString &imgSrc,
                                           checkedChangeSLOT slot,
-                                          drawShape shape,
+                                          drawSetting::drawShape shape,
                                           bool isCheck)
 {
     bool ret = false;
@@ -87,9 +90,9 @@ void LScreenPainterToolBar::resetOtherButton(QObject *srcBtn)
     }
 }
 
-LScreenPainterToolBar::drawShape LScreenPainterToolBar::searchShape(const QObject *btn)
+drawSetting::drawShape LScreenPainterToolBar::searchShape(const QObject *btn)
 {
-    drawShape shape = NONE;
+    drawSetting::drawShape shape = drawSetting::NONE;
     for(auto& obj : m_btnVector){
         if(btn == obj.first ){
             shape = obj.second;
@@ -104,36 +107,47 @@ void LScreenPainterToolBar::onWriteCheckChanged(bool isCheck)
 {
     if(isCheck){
         resetOtherButton(sender());
-        drawShape shape = searchShape(sender());
-        emit activePainter(shape);
+        m_setting.shape = searchShape(sender());
+    }
+    else{
+        m_setting.shape = drawSetting::NONE;
     }
 
+    emit settingChanged(m_setting);
 }
 
 void LScreenPainterToolBar::onSqureCheckChanged(bool isCheck)
 {
     if(isCheck){
         resetOtherButton(sender());
-        drawShape shape = searchShape(sender());
-        emit activePainter(shape);
+        m_setting.shape = searchShape(sender());
+    }
+    else{
+        m_setting.shape = drawSetting::NONE;
     }
 
+    emit settingChanged(m_setting);
 }
 
 void LScreenPainterToolBar::onRoundCheckChanged(bool isCheck)
 {
     if(isCheck){
         resetOtherButton(sender());
-        drawShape shape = searchShape(sender());
-        emit activePainter(shape);
+        m_setting.shape = searchShape(sender());
+        emit settingChanged(m_setting);
     }
+    else{
+        m_setting.shape = drawSetting::NONE;
+    }
+
+    emit settingChanged(m_setting);
 }
 
 void LScreenPainterToolBar::onReturnCheckChanged(bool isCheck)
 {
     Q_UNUSED(isCheck)
 
-    resetOtherButton(sender());
+
 }
 
 void LScreenPainterToolBar::onSaveCheckChanged(bool isCheck)
