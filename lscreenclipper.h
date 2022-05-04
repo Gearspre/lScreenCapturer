@@ -35,6 +35,7 @@ public:
     explicit LScreenClipper(QWidget *parent = nullptr);
 
 public:
+    void reset();
     drawPointSingleton::drawAction drawAction(const QPoint& point);
     QRect clipRect();
     QSize clipSize();
@@ -78,6 +79,7 @@ private:
     clipAreaPos m_clipPos;/** never change before drop down mouse */
     QImage m_screenShot;
     QHash<drawPointSingleton::drawAction, QPoint*> m_actHash;
+    bool isHide = false;
 
 private:
     const qint32 dpRectWidth = drapRectWidth;

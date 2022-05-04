@@ -54,10 +54,12 @@ void drawPointSingleton::appendHistory()
 
 void drawPointSingleton::resetAll()
 {
+    m_currentDraw.action = CREATE;
     m_currentDraw.setting.color = Qt::black;
     m_currentDraw.setting.lineWidth = 1;
     m_currentDraw.setting.shape = drawSetting::NONE;
     m_currentDraw.path.clear();
+    m_drawList.clear();
 }
 
 void drawPointSingleton::resetPath()

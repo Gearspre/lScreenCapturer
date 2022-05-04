@@ -7,5 +7,7 @@
         <file>icon/square.svg</file>
         <file>icon/write.svg</file>
         <file>icon/save.svg</file>
+        <file>icon/close.svg</file>
+        <file>icon/clipper.svg</file>
     </qresource>
 </RCC>

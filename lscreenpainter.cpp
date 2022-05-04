@@ -9,7 +9,6 @@
 LScreenPainter::LScreenPainter(QWidget *parent) : QWidget(parent)
 {
     drawInit();
-//    qRegisterMetaType<LScreenPainter::drawSetting>("LScreenPainter::drawSetting&");
     this->resize(0,0);
     setMouseTracking(true);
 }
@@ -37,6 +36,9 @@ void LScreenPainter::paintEvent(QPaintEvent *e)
     Q_UNUSED(e)
     QPainter painter(this);
     painter.drawImage(0,0,m_background);
+
+    painter.setPen(QPen(Qt::blue, 3, Qt::DashLine));
+    painter.drawRect(rect() - QMargins(0,0,1,1));
     drawShapes(painter, m_drawPoint->current());
 
     for(const drawPointSingleton::drawParam& dParam : m_drawPoint->history()){
@@ -48,7 +50,6 @@ void LScreenPainter::drawShapes(QPainter &painter, const drawPointSingleton::dra
 {
     if(drawSetting::NONE != m_drawPoint->current().setting.shape){
         if(dParam.path.count() >= 2){
-//            const QPoint offset = QPoint(m_background.width(), m_background.height());
             const QPoint start = dParam.path.first() - m_topleft;
             const QPoint end = dParam.path.last() - m_topleft;
             const qint32 width = end.x() - start.x();
@@ -66,7 +67,6 @@ void LScreenPainter::drawShapes(QPainter &painter, const drawPointSingleton::dra
             }
             else if(drawSetting::RECTANGLE == dParam.setting.shape){
                 painter.drawRect(start.x(), start.y(), width, height);
-//                qDebug() << "start.x(), start.y()" <<start.x()<< start.y();
             }
             else if(drawSetting::ELLIPSE == dParam.setting.shape){
                 painter.drawEllipse(start.x(), start.y(), width, height);

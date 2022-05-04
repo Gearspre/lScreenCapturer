@@ -36,10 +36,10 @@ public:
 private:
     drawPointSingleton();
     drawPointSingleton(const drawPointSingleton& other);
+    static drawPointSingleton* m_instance;
 
 public:
     static drawPointSingleton* getInstance();
-    static drawPointSingleton* m_instance;
 
 public:
     drawParam& current();

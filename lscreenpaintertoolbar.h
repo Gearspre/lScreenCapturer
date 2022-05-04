@@ -22,6 +22,9 @@ public:
 
 signals:
     void settingChanged(const drawSetting& setting);
+    void sigSave();
+    void sigClose();
+    void sigReturn();
 
 protected:
     void mousePressEvent(QMouseEvent* e);
@@ -50,6 +53,7 @@ private slots:
     void onRoundCheckChanged(bool isCheck);
     void onReturnCheckChanged(bool isCheck);
     void onSaveCheckChanged(bool isCheck);
+    void onCloseCheckChanged(bool isCheck);
 
 private:
     QPoint m_lastPoint;

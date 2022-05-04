@@ -18,16 +18,6 @@ LScreenPainterToolBar::LScreenPainterToolBar(QWidget *parent) : QToolBar(parent)
 
 drawSetting LScreenPainterToolBar::currentSetting()
 {
-//    drawSetting::drawShape shape = drawSetting::NONE;
-//    for(auto& obj : m_btnVector){
-//        QPushButton* btn = qobject_cast<QPushButton*>(obj.first);
-//        if(btn->isChecked()){
-//            shape = obj.second;
-//            break;
-//        }
-//    }
-
-
     return m_setting;
 }
 
@@ -38,6 +28,7 @@ void LScreenPainterToolBar::iconButtonInit()
     ret = ret && addIconButton(":/icon/icon/round.svg", &LScreenPainterToolBar::onRoundCheckChanged, drawSetting::ELLIPSE);
     ret = ret && addIconButton(":/icon/icon/return.svg", &LScreenPainterToolBar::onReturnCheckChanged, drawSetting::NONE, false);
     ret = ret && addIconButton(":/icon/icon/save.svg", &LScreenPainterToolBar::onSaveCheckChanged, drawSetting::NONE, false);
+    ret = ret && addIconButton(":/icon/icon/close.svg", &LScreenPainterToolBar::onCloseCheckChanged, drawSetting::NONE, false);
 }
 
 void LScreenPainterToolBar::toolBarInit()
@@ -147,7 +138,8 @@ void LScreenPainterToolBar::onReturnCheckChanged(bool isCheck)
 {
     Q_UNUSED(isCheck)
 
-
+    resetOtherButton(sender());
+    emit sigReturn();
 }
 
 void LScreenPainterToolBar::onSaveCheckChanged(bool isCheck)
@@ -155,20 +147,29 @@ void LScreenPainterToolBar::onSaveCheckChanged(bool isCheck)
     Q_UNUSED(isCheck)
 
     resetOtherButton(sender());
+    emit sigSave();
+}
+
+void LScreenPainterToolBar::onCloseCheckChanged(bool isCheck)
+{
+    Q_UNUSED(isCheck)
+
+    resetOtherButton(sender());
+    emit sigClose();
 }
 
 void LScreenPainterToolBar::mousePressEvent(QMouseEvent *e)
 {
-    if(e->buttons() & Qt::LeftButton){
-        m_lastPoint = e->globalPos();
-    }
+//    if(e->buttons() & Qt::LeftButton){
+//        m_lastPoint = e->globalPos();
+//    }
 }
 
 void LScreenPainterToolBar::mouseMoveEvent(QMouseEvent *e)
 {
-    if((e->buttons() & Qt::LeftButton) && !actionAt(e->pos())){
-        const QPoint position = pos() + e->globalPos() - m_lastPoint;
-        move(position.x(),position.y());
-        m_lastPoint = e->globalPos();
-    }
+//    if((e->buttons() & Qt::LeftButton) && !actionAt(e->pos())){
+//        const QPoint position = pos() + e->globalPos() - m_lastPoint;
+//        move(position.x(),position.y());
+//        m_lastPoint = e->globalPos();
+//    }
 }

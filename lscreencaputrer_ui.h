@@ -2,13 +2,16 @@
 #define LSCREENCAPUTRERUI_H
 
 #include <QWidget>
+#include <QSystemTrayIcon>
 
+#include "lkeycapturer.h"
 #include "lscreenpainter.h"
 #include "lscreenclipper.h"
 #include "lscreenpaintertoolbar.h"
 
 class QPaintEvent;
 class QMouseEvent;
+class QKeyEvent;
 class QScreen;
 class drawPointSingleton;
 class LScreenClipper;
@@ -29,24 +32,38 @@ protected:
     void mousePressEvent(QMouseEvent* e);
     void mouseMoveEvent(QMouseEvent* e);
     void mouseReleaseEvent(QMouseEvent* e);
+    void paintEvent(QPaintEvent* e);
 
 private slots:
     void onDrawSettingChanged(drawSetting setting);
+    void onKeyBoardPressed(int key);
+    void onKeyBoardRelease(int key);
+    void onSigSave();
 
 private:
     void clipStart();
     void clipFinish();
     void clipMove();
+    void clipCancel();
 
 private:
     void screenInit();
+    void systemTrayInit();
+    void toolbarInit();
+    void keyCaptureInit();
 
 private:
     Ui::LScreenCaputrerUI *ui;
+    LKeyCapturer* m_keyCapturer = nullptr;
     LScreenPainter* m_painter = nullptr;
     LScreenClipper* m_clipper = nullptr;
     LScreenPainterToolBar* m_ptoolbar = nullptr;
     drawPointSingleton* m_drawPoints = nullptr;
+
+    QSystemTrayIcon* m_systemTray = nullptr;
+    QImage m_background;
+    QHash<int, bool> m_keyHash;
+
+    bool m_isSleep = true;
 };
-Q_DECLARE_METATYPE(drawSetting)
 #endif // LSCREENCAPUTRERUI_H

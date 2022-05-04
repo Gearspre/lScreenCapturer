@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     drawpoints.cpp \
+    lkeycapturer.cpp \
     lscreenclipper.cpp \
     lscreenpainter.cpp \
     lscreenpaintertoolbar.cpp \
@@ -26,6 +27,7 @@ SOURCES += \
 HEADERS += \
     drawpoints.h \
     drawsetting.h \
+    lkeycapturer.h \
     lscreencaputrer_ui.h \
     lscreenclipper.h \
     lscreenpainter.h \

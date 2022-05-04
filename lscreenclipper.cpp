@@ -11,12 +11,25 @@
 
 LScreenClipper::LScreenClipper(QWidget *parent) : QWidget(parent)
 {
-    this->resize(parent->size());
     screenInit();
     clipAreaInit();
     actHashInit();
     setMouseTracking(true);
     m_drawPoints = drawPointSingleton::getInstance();
+}
+
+void LScreenClipper::reset()
+{
+    m_clipArea.height = 0;
+    m_clipArea.width = 0;
+    m_clipArea.rbx = 0;
+    m_clipArea.rby = 0;
+    m_clipArea.img = QImage();
+
+    m_clipPos.bottomLeft = QPoint(0,0);
+    m_clipPos.bottomRight = QPoint(0,0);
+    m_clipPos.topLeft = QPoint(0,0);
+    m_clipPos.topRight = QPoint(0,0);
 }
 
 drawPointSingleton::drawAction LScreenClipper::drawAction(const QPoint &point)
@@ -241,9 +254,6 @@ void LScreenClipper::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setBrush(QBrush(QColor(0, 0, 0, 50)));
 
-    painter.drawImage(0,0,m_screenShot);
-    painter.drawRect(rect());
-
     if(m_drawPoints->current().path.count() >= 2){
 
         if(m_drawPoints->current().action == drawPointSingleton::MOVE){
@@ -299,4 +309,5 @@ void LScreenClipper::paintEvent(QPaintEvent *event)
             updateClipAreaPos();
         }
     }
+
 }
