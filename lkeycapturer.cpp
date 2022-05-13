@@ -1,4 +1,6 @@
 #include "lkeycapturer.h"
+#include <winuser.h>
+#include <QDebug>
 
 LKeyCapturer* LKeyCapturer::m_kCapturer = nullptr;
 HHOOK LKeyCapturer::m_keyHook = NULL;

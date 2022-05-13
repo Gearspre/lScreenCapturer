@@ -22,6 +22,8 @@ void LScreenClipper::reset()
 {
     m_clipArea.height = 0;
     m_clipArea.width = 0;
+    m_clipArea.x = 0;
+    m_clipArea.y = 0;
     m_clipArea.rbx = 0;
     m_clipArea.rby = 0;
     m_clipArea.img = QImage();
@@ -30,6 +32,20 @@ void LScreenClipper::reset()
     m_clipPos.bottomRight = QPoint(0,0);
     m_clipPos.topLeft = QPoint(0,0);
     m_clipPos.topRight = QPoint(0,0);
+}
+
+void LScreenClipper::updateClipOffset()
+{
+    const QPoint first = m_drawPoints->current().path.first();
+    m_clipArea.offsetx = m_clipArea.x - first.x();
+    m_clipArea.offsety = m_clipArea.y - first.y();
+}
+
+void LScreenClipper::setScreenShot(QImage *img)
+{
+    if(img){
+        m_screenShot = img;
+    }
 }
 
 drawPointSingleton::drawAction LScreenClipper::drawAction(const QPoint &point)
@@ -146,7 +162,7 @@ void LScreenClipper::screenInit()
     if (const QWindow *window = windowHandle())
         screen = window->screen();
     this->resize(screen->size());
-    m_screenShot = screen->grabWindow(0).toImage();
+//    m_screenShot = screen->grabWindow(0).toImage();
 //    if (!m_currentScreen)
     //        return;
 }
@@ -203,7 +219,7 @@ bool LScreenClipper::calculateClipArea(const QPoint &first,
     //row by column - left to Right
     for(qint32 clipY = drawY, srcY = 0; clipY < limitY; clipY++, srcY++){
         for(qint32 clipX = drawX, srcX = 0; clipX < limitX; clipX++,srcX++){
-            clipImg.setPixel(srcX, srcY, m_screenShot.pixel(clipX, clipY));
+            clipImg.setPixel(srcX, srcY, m_screenShot->pixel(clipX, clipY));
         }
     }
 
@@ -218,34 +234,29 @@ bool LScreenClipper::calculateClipArea(const QPoint &first,
     return true;
 }
 
-void LScreenClipper::moveClipArea(const QPoint &first, const QPoint &last, LScreenClipper::clipArea &area)
+void LScreenClipper::moveClipArea(const QPoint &last, LScreenClipper::clipArea &area)
 {
-    const qint32 firstX = first.x();
-    const qint32 firstY = first.y();
     const qint32 lastX = last.x();
     const qint32 lastY = last.y();
 
-    const qint32 shiftX = lastX - firstX;
-    const qint32 shiftY = lastY - firstY;
-    const qint32 finallyX = area.x + shiftX;
-    const qint32 finallyY = area.y + shiftY;
+    const qint32 newltx = lastX + area.offsetx; // left top x
+    const qint32 newlty = lastY + area.offsety; // left top y
 
     const qint32 aheight = qAbs(area.height);
     const qint32 awidth = qAbs(area.width);
 
-
     for(qint32 srcY = 0; srcY < aheight; srcY++){
-        qint32 offestY = srcY + finallyY;
+        qint32 offestY = srcY + newlty;
         for(int srcX = 0; srcX < awidth; srcX++){
-            qint32 offestX = srcX + finallyX;
-            area.img.setPixel(srcX, srcY, m_screenShot.pixel(offestX, offestY));
+            qint32 offestX = srcX + newltx;
+            area.img.setPixel(srcX, srcY, m_screenShot->pixel(offestX, offestY));
         }
     }
 
-    area.x = finallyX ;
-    area.y = finallyY ;
-    area.rbx = area.rbx + shiftX;
-    area.rby = area.rby + shiftY;
+    area.x = newltx ;
+    area.y = newlty ;
+    area.rbx = newltx + awidth;
+    area.rby = newlty + aheight;
 }
 
 void LScreenClipper::paintEvent(QPaintEvent *event)
@@ -253,12 +264,12 @@ void LScreenClipper::paintEvent(QPaintEvent *event)
     Q_UNUSED(event)
     QPainter painter(this);
     painter.setBrush(QBrush(QColor(0, 0, 0, 50)));
+//    painter.drawRect(clipRect());
 
-    if(m_drawPoints->current().path.count() >= 2){
+    if(m_drawPoints->current().path.count() >= 3){
 
-        if(m_drawPoints->current().action == drawPointSingleton::MOVE){
-            moveClipArea(m_drawPoints->current().path.at(m_drawPoints->current().path.count()-2),
-                         m_drawPoints->current().path.last(),
+        if(m_drawPoints->current().action == drawPointSingleton::MOVE ){
+            moveClipArea(m_drawPoints->current().path.last(),
                          m_clipArea);
         }
 

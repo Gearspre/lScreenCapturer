@@ -39,12 +39,15 @@ private slots:
     void onKeyBoardPressed(int key);
     void onKeyBoardRelease(int key);
     void onSigSave();
+    void onSigReturn();
 
 private:
     void clipStart();
     void clipFinish();
+    void clipMoveStart();
     void clipMove();
     void clipCancel();
+    QScreen* updateBackground();
 
 private:
     void screenInit();

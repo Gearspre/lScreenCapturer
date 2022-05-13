@@ -18,12 +18,23 @@ void LScreenPainter::startPaint(const QPoint &topLeft, const QImage &img)
     this->resize(img.size());
     this->move(topLeft);
     m_background = img;
+    m_output = m_background.copy();
     m_topleft = topLeft;
 }
 
 void LScreenPainter::stopPaint()
 {
     this->resize(0,0);
+}
+
+QImage LScreenPainter::getImage()
+{
+    return m_output;
+}
+
+QImage LScreenPainter::getOriginImage()
+{
+    return m_background;
 }
 
 void LScreenPainter::drawInit()
@@ -34,15 +45,18 @@ void LScreenPainter::drawInit()
 void LScreenPainter::paintEvent(QPaintEvent *e)
 {
     Q_UNUSED(e)
+    QPainter imgPainter(&m_output);
     QPainter painter(this);
     painter.drawImage(0,0,m_background);
-
-    painter.setPen(QPen(Qt::blue, 3, Qt::DashLine));
-    painter.drawRect(rect() - QMargins(0,0,1,1));
+    if(m_drawPoint->current().action == drawPointSingleton::PAINTING){
+        painter.setPen(QPen(Qt::blue, 3, Qt::DashLine));
+        painter.drawRect(rect() - QMargins(0,0,1,1));
+    }
     drawShapes(painter, m_drawPoint->current());
-
+    drawShapes(imgPainter, m_drawPoint->current());
     for(const drawPointSingleton::drawParam& dParam : m_drawPoint->history()){
         drawShapes(painter, dParam);
+        drawShapes(imgPainter, dParam);
     }
 }
 

@@ -18,7 +18,9 @@ public:
     explicit LScreenPainterToolBar(QWidget *parent = nullptr);
 
 public:
+    bool isPainting();
     drawSetting currentSetting();
+    void resetSetting();
 
 signals:
     void settingChanged(const drawSetting& setting);
@@ -45,7 +47,7 @@ private:
                        drawSetting::drawShape shape = drawSetting::NONE,
                        bool isCheck = true);
 
-    void resetOtherButton(QObject* srcBtn);
+    void resetOtherButton(QObject* srcBtn = nullptr);
     drawSetting::drawShape searchShape(const QObject* btn);
 private slots:
     void onWriteCheckChanged(bool isCheck);

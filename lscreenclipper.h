@@ -26,6 +26,8 @@ class LScreenClipper : public QWidget
         qint32 y = 0;   /** left top y */
         qint32 rbx = 0; /** right bottom x */
         qint32 rby = 0; /** right bottom y */
+        qint32 offsetx = 0; /** horizontal distance between mouse and clip left top **/
+        qint32 offsety = 0; /** vertical distance between mouse and clip left top **/
         qint32 width = 0;
         qint32 height = 0;
         QImage img;     /** clip img */
@@ -36,6 +38,10 @@ public:
 
 public:
     void reset();
+    void updateClipOffset();
+    void setScreenShot(QImage* img);
+
+public:
     drawPointSingleton::drawAction drawAction(const QPoint& point);
     QRect clipRect();
     QSize clipSize();
@@ -60,8 +66,7 @@ private:
     bool calculateClipArea(const QPoint& first,
                            const QPoint& last,
                            clipArea& area);
-    void moveClipArea(const QPoint& first,
-                      const QPoint& last,
+    void moveClipArea(const QPoint& last,
                       clipArea& area);
 
 private:
@@ -77,7 +82,7 @@ private:
     drawPointSingleton* m_drawPoints = nullptr;
     clipArea m_clipArea;
     clipAreaPos m_clipPos;/** never change before drop down mouse */
-    QImage m_screenShot;
+    QImage* m_screenShot = nullptr;
     QHash<drawPointSingleton::drawAction, QPoint*> m_actHash;
     bool isHide = false;
 

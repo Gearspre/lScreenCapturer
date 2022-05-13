@@ -20,6 +20,8 @@ public:
 public:
     void startPaint(const QPoint& topLeft, const QImage& img);
     void stopPaint();
+    QImage getImage();
+    QImage getOriginImage();
 
 protected:
     void paintEvent(QPaintEvent* e);
@@ -32,6 +34,7 @@ private:
 private:
     drawPointSingleton* m_drawPoint = nullptr;
     QImage m_background;
+    QImage m_output;
     QPoint m_topleft;
 signals:
 

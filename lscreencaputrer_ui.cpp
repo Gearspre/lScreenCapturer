@@ -16,6 +16,8 @@
 
 #include "drawpoints.h"
 
+#define PTOOLBAR_OFFSET_Y 5
+
 LScreenCaputrerUI::LScreenCaputrerUI(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::LScreenCaputrerUI)
@@ -33,10 +35,10 @@ LScreenCaputrerUI::LScreenCaputrerUI(QWidget *parent)
 
     m_painter->setAttribute(Qt::WA_TransparentForMouseEvents, true);
     m_clipper->setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    this->grabKeyboard();
-//    this->hide();
     this->resize(0, 0);
     m_clipper->hide();
+    m_painter->hide();
+    m_ptoolbar->hide();
 }
 
 LScreenCaputrerUI::~LScreenCaputrerUI()
@@ -50,16 +52,16 @@ void LScreenCaputrerUI::mousePressEvent(QMouseEvent *e)
 {
     if(e->buttons() & Qt::LeftButton){
         drawPointSingleton::drawAction act = m_clipper->drawAction(e->pos());
+        m_drawPoints->appendPoint(e->pos());
         if(m_ptoolbar->currentSetting().shape != drawSetting::NONE){
             act = drawPointSingleton::PAINTING;
+            m_ptoolbar->raise();
+        }
+        else if(act == drawPointSingleton::MOVE){
+            clipMoveStart();
         }
 
-        m_drawPoints->appendPoint(e->pos());
         m_drawPoints->setCurrentAction(act);
-
-        if(act == drawPointSingleton::CREATE){
-            clipStart();
-        }
     }
 }
 
@@ -70,11 +72,11 @@ void LScreenCaputrerUI::mouseMoveEvent(QMouseEvent *e)
         Qt::CursorShape curs = cursor().shape();
         switch (curs) {
         case Qt::CrossCursor:
-        case Qt::SizeFDiagCursor:
-        case Qt::SizeBDiagCursor:
-            clipStart();
+//            clipStart();
             break;
 
+        case Qt::SizeFDiagCursor:
+        case Qt::SizeBDiagCursor:
         case Qt::SizeAllCursor:
             clipMove();
             break;
@@ -118,8 +120,7 @@ void LScreenCaputrerUI::mouseMoveEvent(QMouseEvent *e)
 
 
     }
-
-    repaint();
+    update();
 }
 
 void LScreenCaputrerUI::mouseReleaseEvent(QMouseEvent *e)
@@ -128,7 +129,7 @@ void LScreenCaputrerUI::mouseReleaseEvent(QMouseEvent *e)
     m_drawPoints->appendHistory();
     m_drawPoints->resetPath();
     clipFinish();
-    repaint();
+    update();
 }
 
 void LScreenCaputrerUI::paintEvent(QPaintEvent *e)
@@ -141,25 +142,19 @@ void LScreenCaputrerUI::paintEvent(QPaintEvent *e)
         painter.drawImage(0,0,m_background);
         painter.drawRect(rect());
     }
+
 }
 
 void LScreenCaputrerUI::onDrawSettingChanged(drawSetting setting)
 {
     m_drawPoints->setCurrentSetting(setting);
     if(setting.shape != drawSetting::NONE){
-        bool isVaild = false;
-        QImage img = m_clipper->clipImage(isVaild);
-        if(isVaild){
-            m_painter->startPaint(m_clipper->clipTopLeft(), img);
-        }
-        else{
-            QMessageBox::critical(this, "error", "causing unknown error when get screnn image");
-            return;
-        }
+        m_drawPoints->setCurrentAction(drawPointSingleton::PAINTING);
         m_painter->show();
         m_clipper->hide();
     }
     else{
+        m_drawPoints->setCurrentAction(drawPointSingleton::CREATE);
         m_painter->hide();
         m_clipper->show();
     }
@@ -179,6 +174,7 @@ void LScreenCaputrerUI::onKeyBoardPressed(int key)
         check = check && m_keyHash.value(Qt::Key_A);
 
         if(check){
+            qDebug() << "clipStart";
             m_keyHash.clear();
             clipStart();
         }
@@ -192,62 +188,107 @@ void LScreenCaputrerUI::onKeyBoardRelease(int key)
 
 void LScreenCaputrerUI::onSigSave()
 {
-    const QString defPath = QString("/ScreenCapture_%1.%2").arg(QDateTime::currentDateTime().toString("yyyyMMddhhmmss")).arg("png");
+    const QString defPath = QString("/LScreenCapture_%1.%2").arg(QDateTime::currentDateTime().toString("yyyyMMddhhmmss")).arg("png");
     QString sPath = QFileDialog::getSaveFileName(this, "Save Image",
                                                 defPath,
                                                 "Images (*.png *.jpg)");
-    qDebug() << sPath;
+    if(!sPath.isEmpty()){
+        m_ptoolbar->isPainting() ?
+                    m_painter->getImage().save(sPath) :
+                    m_painter->getOriginImage().save(sPath);
+        clipCancel();
+    }
+}
+
+void LScreenCaputrerUI::onSigReturn()
+{
+    if(!m_drawPoints->history().isEmpty()){
+        m_drawPoints->history().removeLast();
+        repaint();
+    }
 }
 
 
 void LScreenCaputrerUI::clipStart()
 {
+    updateBackground();
     this->resize(m_background.size());
     this->move(0, 0);
     m_isSleep = false;
+    m_drawPoints->setCurrentAction(drawPointSingleton::CREATE);
     m_clipper->show();
     m_ptoolbar->hide();
 }
 
 void LScreenCaputrerUI::clipFinish()
 {
-    QPoint bottomleft = m_clipper->clipBottomLeft();
-//    m_painter->startPaint(m_clipper->clipTopLeft(), m_clipper->clipSize());
+    if(m_drawPoints->current().action != drawPointSingleton::PAINTING){
+        bool isVaild = false;
+        QImage img = m_clipper->clipImage(isVaild);
+        if(isVaild){
+            m_painter->startPaint(m_clipper->clipTopLeft(), img);
+        }
+        else{
+            QMessageBox::critical(this, "error", "causing unknown error when get screnn image");
+            return;
+        }
+    }
 
+    QPoint bottomleft = m_clipper->clipBottomLeft();
+    bottomleft.setY(bottomleft.y() + PTOOLBAR_OFFSET_Y);
     m_ptoolbar->show();
     m_ptoolbar->move(bottomleft);
+    m_ptoolbar->raise();
+}
+
+void LScreenCaputrerUI::clipMoveStart()
+{
+    m_clipper->updateClipOffset();
 }
 
 void LScreenCaputrerUI::clipMove()
 {
     QPoint bottomleft = m_clipper->clipBottomLeft();
-//    bottomleft.setY(bottomleft.y() - m_ptoolbar->height());
+    bottomleft.setY(bottomleft.y() + PTOOLBAR_OFFSET_Y);
+    m_painter->hide();
     m_ptoolbar->show();
     m_ptoolbar->move(bottomleft);
+    m_ptoolbar->raise();
 }
 
 void LScreenCaputrerUI::clipCancel()
 {
     qDebug() << "clipCancel";
-//    this->resize(0, 0);
     m_isSleep = true;
+
     m_ptoolbar->hide();
     m_clipper->hide();
+    m_painter->hide();
+
     m_drawPoints->resetAll();
     m_clipper->reset();
+    m_ptoolbar->resetSetting();
     this->setFocus();
+
+    update();
 }
 
-void LScreenCaputrerUI::screenInit()
+QScreen* LScreenCaputrerUI::updateBackground()
 {
     QScreen* screen = QGuiApplication::primaryScreen();
     if (const QWindow *window = windowHandle())
         screen = window->screen();
     m_background = screen->grabWindow(0).toImage();
+    m_clipper->setScreenShot(&m_background);
 
-    this->setWindowFlags(Qt::SubWindow | Qt::FramelessWindowHint);
+    return screen;
+}
+
+void LScreenCaputrerUI::screenInit()
+{
+    updateBackground();
+    this->setWindowFlags(Qt::SubWindow | Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
     setAttribute(Qt::WA_TranslucentBackground);
-    resize(screen->size());
     setMouseTracking(true);
 }
 
@@ -283,12 +324,14 @@ void LScreenCaputrerUI::toolbarInit()
         clipCancel();
     } );
     connect(m_ptoolbar, SIGNAL(sigSave()), this, SLOT(onSigSave()));
+    connect(m_ptoolbar, SIGNAL(sigReturn()), this, SLOT(onSigReturn()));
 }
 
 void LScreenCaputrerUI::keyCaptureInit()
 {
     m_keyCapturer = LKeyCapturer::getInstance();
     connect(m_keyCapturer, SIGNAL(KeyPressed(int)), this, SLOT(onKeyBoardPressed(int)));
+    connect(m_keyCapturer, SIGNAL(KeyRelease(int)), this, SLOT(onKeyBoardRelease(int)));
 }
 
 

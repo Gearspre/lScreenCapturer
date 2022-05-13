@@ -16,9 +16,32 @@ LScreenPainterToolBar::LScreenPainterToolBar(QWidget *parent) : QToolBar(parent)
     this->hide();
 }
 
+bool LScreenPainterToolBar::isPainting()
+{
+    bool ret = false;
+    for(auto& obj : m_btnVector){
+        QPushButton* btn = qobject_cast<QPushButton*>(obj.first);
+        if(btn->isChecked()) {
+            ret = true;
+            break;
+        }
+    }
+
+    return ret;
+}
+
 drawSetting LScreenPainterToolBar::currentSetting()
 {
     return m_setting;
+}
+
+void LScreenPainterToolBar::resetSetting()
+{
+    m_setting.color = Qt::black;
+    m_setting.lineWidth = 1;
+    m_setting.shape = drawSetting::NONE;
+
+    resetOtherButton();
 }
 
 void LScreenPainterToolBar::iconButtonInit()
@@ -34,7 +57,7 @@ void LScreenPainterToolBar::iconButtonInit()
 void LScreenPainterToolBar::toolBarInit()
 {
     this->setStyleSheet("background-color: #f6f6f6");
-    this->setWindowFlags(Qt::Window |Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+    this->setWindowFlags(Qt::SubWindow |Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     setAttribute(Qt::WA_TranslucentBackground);
 }
 
@@ -75,7 +98,12 @@ void LScreenPainterToolBar::resetOtherButton(QObject *srcBtn)
 {
     for(auto& obj : m_btnVector){
         QPushButton* btn = qobject_cast<QPushButton*>(obj.first);
-        if(btn->isChecked() && obj.first != srcBtn){
+        if(srcBtn){
+            if(btn->isChecked() && obj.first != srcBtn){
+                btn->setChecked(false);
+            }
+        }
+        else{
             btn->setChecked(false);
         }
     }
@@ -138,7 +166,7 @@ void LScreenPainterToolBar::onReturnCheckChanged(bool isCheck)
 {
     Q_UNUSED(isCheck)
 
-    resetOtherButton(sender());
+//    resetOtherButton(sender());
     emit sigReturn();
 }
 
@@ -146,8 +174,8 @@ void LScreenPainterToolBar::onSaveCheckChanged(bool isCheck)
 {
     Q_UNUSED(isCheck)
 
-    resetOtherButton(sender());
     emit sigSave();
+    resetOtherButton(sender());
 }
 
 void LScreenPainterToolBar::onCloseCheckChanged(bool isCheck)
@@ -160,6 +188,7 @@ void LScreenPainterToolBar::onCloseCheckChanged(bool isCheck)
 
 void LScreenPainterToolBar::mousePressEvent(QMouseEvent *e)
 {
+    Q_UNUSED(e)
 //    if(e->buttons() & Qt::LeftButton){
 //        m_lastPoint = e->globalPos();
 //    }
@@ -167,6 +196,7 @@ void LScreenPainterToolBar::mousePressEvent(QMouseEvent *e)
 
 void LScreenPainterToolBar::mouseMoveEvent(QMouseEvent *e)
 {
+    Q_UNUSED(e)
 //    if((e->buttons() & Qt::LeftButton) && !actionAt(e->pos())){
 //        const QPoint position = pos() + e->globalPos() - m_lastPoint;
 //        move(position.x(),position.y());
