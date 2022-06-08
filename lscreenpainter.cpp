@@ -27,8 +27,10 @@ void LScreenPainter::stopPaint()
     this->resize(0,0);
 }
 
-QImage LScreenPainter::getImage()
+QImage& LScreenPainter::getImage()
 {
+    m_isSave = true;
+    repaint();
     return m_output;
 }
 
@@ -53,10 +55,15 @@ void LScreenPainter::paintEvent(QPaintEvent *e)
         painter.drawRect(rect() - QMargins(0,0,1,1));
     }
     drawShapes(painter, m_drawPoint->current());
-    drawShapes(imgPainter, m_drawPoint->current());
+//    drawShapes(imgPainter, m_drawPoint->current());
     for(const drawPointSingleton::drawParam& dParam : m_drawPoint->history()){
         drawShapes(painter, dParam);
-        drawShapes(imgPainter, dParam);
+    }
+    if(m_isSave) {
+        for(const drawPointSingleton::drawParam& dParam : m_drawPoint->history()){
+            drawShapes(imgPainter, dParam);
+        }
+        m_isSave = !m_isSave;
     }
 }
 

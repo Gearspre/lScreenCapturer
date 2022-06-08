@@ -20,7 +20,7 @@ public:
 public:
     void startPaint(const QPoint& topLeft, const QImage& img);
     void stopPaint();
-    QImage getImage();
+    QImage &getImage();
     QImage getOriginImage();
 
 protected:
@@ -36,6 +36,7 @@ private:
     QImage m_background;
     QImage m_output;
     QPoint m_topleft;
+    bool m_isSave = false;
 signals:
 
 };
